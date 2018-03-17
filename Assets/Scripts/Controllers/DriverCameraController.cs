@@ -22,7 +22,7 @@ public class DriverCameraController : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         if (carController.IsGrounded())
             PositionCameraForGroundedCar();
         else
@@ -35,7 +35,8 @@ public class DriverCameraController : MonoBehaviour {
         //var currentPositionRelativeToCar = transform.position - car.position;
         //var newPositionRelativeToCar = Vector3.RotateTowards(currentPositionRelativeToCar, targetPositionRelativeToCar, Mathf.Infinity, Mathf.Infinity);
         //transform.position = car.position + newPositionRelativeToCar;
-        transform.position = car.position - followDistance * Vector3.ProjectOnPlane(car.transform.forward, Vector3.up).normalized + followHeight * Vector3.up;
+        var newPos = car.position - followDistance * Vector3.ProjectOnPlane(car.transform.forward, Vector3.up).normalized + followHeight * Vector3.up;
+        transform.position = Vector3.Lerp( transform.position, newPos, 10f * Time.fixedDeltaTime);
 
         SetLookDirection();
     }
@@ -43,7 +44,8 @@ public class DriverCameraController : MonoBehaviour {
     void PositionCameraForAirborneCar()
     {
         var groundDirectionFromCarToPlayer = Vector3.ProjectOnPlane(transform.position - car.position, Vector3.up).normalized;
-        transform.position = car.position + followDistance * groundDirectionFromCarToPlayer + followHeight * Vector3.up;
+        var newPos = car.position + followDistance * groundDirectionFromCarToPlayer + followHeight * Vector3.up;
+        transform.position = Vector3.Lerp(transform.position, newPos, 10f * Time.fixedDeltaTime);
 
         SetLookDirection();
     }
