@@ -10,11 +10,14 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     public Vector3[] movementPointsRelativeToCar;
     public float movementSpeed;
+    public float maxUseDistance = 1f;
 
     private Vector3 forwardRelativeToCar;
     private Vector3 upwardRelativeToCar;
 
     private float movementPointPosition = 0f;
+
+    private CarAttachment selectedAttachment = null;
 
     // Use this for initialization
     private void Awake()
@@ -43,6 +46,8 @@ public class GrapplerCharacterController : MonoBehaviour {
 
         transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
         mouseLook.LookRotation(transform, cam.transform);
+
+        UpdateAttachmentUse();
     }
 
     Vector3 GetCarRelativePositionForMovementPointPosition(float position)
@@ -75,5 +80,37 @@ public class GrapplerCharacterController : MonoBehaviour {
             runningTotal += Vector3.Distance(movementPointsRelativeToCar[i], movementPointsRelativeToCar[(i + 1) % movementPointsRelativeToCar.Length]);
         }
         return runningTotal;
+    }
+
+    CarAttachment GetAttachmentToUse()
+    {
+        RaycastHit hitInfo;
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hitInfo, maxUseDistance, LayerMask.NameToLayer("attachments")))
+        {
+            var attachment = hitInfo.collider.GetComponent<CarAttachment>();
+            return attachment;
+        }
+
+        return null;
+    }
+
+    void UpdateAttachmentUse()
+    {
+        var newAttachment = GetAttachmentToUse();
+        if(selectedAttachment != null && newAttachment != selectedAttachment)
+        {
+            selectedAttachment.Unhighlight();
+        }
+
+        selectedAttachment = newAttachment;
+        if(selectedAttachment != null)
+        {
+            selectedAttachment.Highlight();
+
+            if (Input.GetButtonDown("Fire1") && selectedAttachment.IsUseable())
+            {
+                selectedAttachment.Use();
+            }
+        }
     }
 }
