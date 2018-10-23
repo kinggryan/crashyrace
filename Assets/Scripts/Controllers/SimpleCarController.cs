@@ -14,6 +14,8 @@ public class SimpleCarController : MonoBehaviour
 
     private float previousMotor;
     private new Rigidbody rigidbody;
+    [SerializeField]
+    private ICarControlInput input;
 
     public void Awake()
     {
@@ -51,10 +53,10 @@ public class SimpleCarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        float motor = maxMotorTorque * Input.GetAxis("Vertical");
-        float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-        float brake = maxBrakeTorque * (Input.GetButton("Brake") ? 1 : 0) ;
-        
+        float motor = maxMotorTorque * input.GetMotorInput();
+        float steering = maxSteeringAngle * input.GetSteerInput();
+        float brake = maxBrakeTorque * input.GetBrakeInput();
+
         foreach (AxleInfo axleInfo in axleInfos)
         {
             if (axleInfo.steering)
