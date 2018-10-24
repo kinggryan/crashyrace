@@ -12,12 +12,17 @@ public class GrapplerCharacterController : MonoBehaviour {
     public float movementSpeed;
     public float maxUseDistance = 1f;
 
+    public float stationEntranceSpeed = 2f;
+    public float stationUseDistance = 0.2f;
+
     private Vector3 forwardRelativeToCar;
     private Vector3 upwardRelativeToCar;
 
     private float movementPointPosition = 0f;
 
     private CarAttachment selectedAttachment = null;
+    private bool inStation = false;
+    private Vector3 positionRelativeToCar;
 
     // Use this for initialization
     private void Awake()
@@ -33,21 +38,18 @@ public class GrapplerCharacterController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
-        var movement = movementSpeed * -Input.GetAxis("Horizontal");
-        movementPointPosition += movement * Time.deltaTime;
-        if(movementPointPosition < 0)
+        if(inStation)
         {
-            movementPointPosition += GetMovementPointMaxDistance();
+            UpdateMovementInStation();
+            UpdateAttachmentUseInStation();
+
+        } else
+        {
+            UpdateMovement();
+            UpdateAttachmentUse();
         }
-        var positionRelativeToCar = GetCarRelativePositionForMovementPointPosition(movementPointPosition);
 
-        transform.position = car.transform.TransformPoint(positionRelativeToCar);
-
-        transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
-        mouseLook.LookRotation(transform, cam.transform);
-
-        UpdateAttachmentUse();
+        positionRelativeToCar = car.transform.InverseTransformPoint(transform.position);
     }
 
     Vector3 GetCarRelativePositionForMovementPointPosition(float position)
@@ -109,8 +111,74 @@ public class GrapplerCharacterController : MonoBehaviour {
 
             if (Input.GetButtonDown("Fire1") && selectedAttachment.IsUseable())
             {
-                selectedAttachment.Use();
+                selectedAttachment.Use(this);
+            }
+            if(Input.GetButtonUp("Fire1") && selectedAttachment.beingUsed)
+            {
+                selectedAttachment.EndUseManual();
             }
         }
+    }
+
+    void UpdateAttachmentUseInStation()
+    {
+        if (Input.GetButtonDown("Fire1") && selectedAttachment.IsUseable())
+        {
+            selectedAttachment.Use(this);
+        }
+        if (Input.GetButtonUp("Fire1") && selectedAttachment.beingUsed)
+        {
+            selectedAttachment.EndUseManual();
+        }
+
+        selectedAttachment.transform.rotation = cam.transform.rotation;
+    }
+
+    void UpdateMovement()
+    {
+        var movement = movementSpeed * -Input.GetAxis("Horizontal");
+        movementPointPosition += movement * Time.deltaTime;
+        if (movementPointPosition < 0)
+        {
+            movementPointPosition += GetMovementPointMaxDistance();
+        }
+        var positionRelativeToCar = GetCarRelativePositionForMovementPointPosition(movementPointPosition);
+
+        transform.position = car.transform.TransformPoint(positionRelativeToCar);
+
+        UpdateLookDirection();
+    }
+
+    void UpdateLookDirection()
+    {
+        transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
+        mouseLook.LookRotation(transform, cam.transform);
+    }
+
+    void UpdateMovementInStation()
+    {
+        if (!FullyInStation())
+        {
+            var currentPosition = positionRelativeToCar;
+            var targetPosition = car.transform.InverseTransformPoint(selectedAttachment.transform.position);
+            transform.position = car.transform.TransformPoint(Vector3.MoveTowards(currentPosition, targetPosition, stationEntranceSpeed * Time.deltaTime));
+        } else
+        {
+            transform.position = selectedAttachment.transform.position;
+        }
+
+        UpdateLookDirection();
+    }
+
+    public void EnterStation(CarAttachment station)
+    {
+        inStation = true;
+        selectedAttachment = station;
+    }
+
+    bool FullyInStation()
+    {
+        var targetPosition = selectedAttachment.transform.position;
+        return Vector3.Distance(targetPosition, transform.position) < stationUseDistance;
     }
 }

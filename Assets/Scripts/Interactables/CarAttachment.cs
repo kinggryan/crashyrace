@@ -4,17 +4,20 @@ using UnityEngine;
 
 public class CarAttachment : MonoBehaviour {
 
+    public bool continuous;
+
     private new Renderer renderer;
     protected Color unhighlightedColor = Color.yellow;
     protected Color highlightedColor = Color.cyan;
     protected Color usedColor = Color.green;
 
     private bool highlighted = false;
-    private bool beingUsed = false;
+    public bool beingUsed { get; private set; }
 
 	// Use this for initialization
 	void Awake () {
         renderer = GetComponent<Renderer>();
+        beingUsed = false;
     }
 
     private void Start()
@@ -27,11 +30,12 @@ public class CarAttachment : MonoBehaviour {
         return true;
     }
     
-    public virtual void Use()
+    public virtual void Use(GrapplerCharacterController character)
     {
         renderer.material.color = usedColor;
         beingUsed = true;
-        StartCoroutine(EndUse());
+        if(!continuous)
+            StartCoroutine(EndUseInSeconds(0.3f));
     }
 
     public void Highlight()
@@ -47,20 +51,35 @@ public class CarAttachment : MonoBehaviour {
     {
         highlighted = false;
         if (beingUsed)
+        {
+            if (continuous)
+                EndUse();
             return;
+        }
 
         renderer.material.color = unhighlightedColor;
     }
 
-    IEnumerator EndUse()
+    public void EndUseManual()
     {
-        yield return new WaitForSeconds(0.3f);
+        if (continuous)
+            EndUse();
+    }
 
+    IEnumerator EndUseInSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        EndUse();
+    }
+
+    void EndUse()
+    {
         beingUsed = false;
-        if(highlighted)
+        if (highlighted)
         {
             Highlight();
-        } else
+        }
+        else
         {
             Unhighlight();
         }
