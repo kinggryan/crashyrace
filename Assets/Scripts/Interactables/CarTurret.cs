@@ -14,7 +14,7 @@ public class CarTurret : CarAttachment {
 	// Update is called once per frame
 	void Update () {
         fireCooldown = Mathf.Max(0, fireCooldown - Time.deltaTime);
-        Debug.Log("B: " + beingUsed + "F: " + fireCooldown);
+        // Debug.Log("B: " + beingUsed + "F: " + fireCooldown);
 		if(beingUsed && fireCooldown <= 0)
         {
             fireCooldown += 1 / fireRate;
