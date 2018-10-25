@@ -85,6 +85,8 @@ public class Car : MonoBehaviour {
         pickup.SetPickupEnabled(false);
         pickup.AttachToCar(this, 5 * Vector3.up);
         pickups.Add(pickup);
+
+        BroadcastMessage("DidAcquirePickup", pickup, SendMessageOptions.DontRequireReceiver);
     }
 
     public void DropPickup(Pickup pickup)

@@ -22,7 +22,7 @@ public class DriverSteeringLayer : ICarControlInput
     public void SetDestination(Vector3 destination)
     {
         NavMeshHit destinationNavMeshPointInfo;
-        var foundPoint = NavMesh.SamplePosition(destination, out destinationNavMeshPointInfo, 4f, NavMesh.AllAreas);
+        var foundPoint = NavMesh.SamplePosition(destination, out destinationNavMeshPointInfo, 8f, NavMesh.AllAreas);
         if (!foundPoint)
             Debug.LogError("Couldn't find point at start");
         this.destination = destinationNavMeshPointInfo.position;
@@ -41,19 +41,13 @@ public class DriverSteeringLayer : ICarControlInput
             Debug.LogError("Error finding path...");
 
         // Calculate angle between our current velocity and the vector towards the destination, projected onto the vector of the car's steering plane
-        if(path.corners.Length > 1)
-        {
-            var desiredMovementVector = path.corners[1] - car.position;
-            var currentMovementVector = car.velocity;
+        var desiredMovementVector = path.corners[Mathf.Max(1,path.corners.Length-1)] - car.position;
+        var currentMovementVector = car.velocity;
             
-            var correctedDesiredMovementVector = Vector3.ProjectOnPlane(desiredMovementVector, car.transform.up);
-            var correctedCurrentMovementVector = Vector3.ProjectOnPlane(currentMovementVector, car.transform.up);
-            var steeringAngle = Vector3.SignedAngle(correctedCurrentMovementVector, correctedDesiredMovementVector, car.transform.up);
-            steeringValue = Mathf.Clamp(steeringAngle / maxTurnAngle, -1, 1);
-        } else
-        {
-            Debug.LogError("Path not long enough...");
-        }
+        var correctedDesiredMovementVector = Vector3.ProjectOnPlane(desiredMovementVector, car.transform.up);
+        var correctedCurrentMovementVector = Vector3.ProjectOnPlane(currentMovementVector, car.transform.up);
+        var steeringAngle = Vector3.SignedAngle(correctedCurrentMovementVector, correctedDesiredMovementVector, car.transform.up);
+        steeringValue = Mathf.Clamp(steeringAngle / maxTurnAngle, -1, 1);
 	}
 
     public override float GetMotorInput()
