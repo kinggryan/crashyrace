@@ -95,6 +95,8 @@ public class Car : MonoBehaviour {
         pickup.SetPickupEnabled(true);
         pickup.RemoveFromCar();
         pickups.Remove(pickup);
+
+        BroadcastMessage("DidDropPickup", pickup, SendMessageOptions.DontRequireReceiver);
     }
 
     private void CreateDamageObject(Vector3 point, float damage)

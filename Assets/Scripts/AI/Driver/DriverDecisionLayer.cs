@@ -19,6 +19,10 @@ public class DriverDecisionLayer : MonoBehaviour {
         {
             return null;
         }
+        public virtual State DidDropPickup(Pickup pickup)
+        {
+            return null;
+        }
     }
 
     public DriverSteeringLayer steeringLayer;
@@ -42,6 +46,19 @@ public class DriverDecisionLayer : MonoBehaviour {
     {
         var newState = state.DidAcquirePickup(pickup);
         if (newState != null)
+        {
             state = newState;
+            Debug.Log("Transitioned to state: " + newState);
+        }
+    }
+
+    private void DidDropPickup(Pickup pickup)
+    {
+        var newState = state.DidDropPickup(pickup);
+        if (newState != null)
+        {
+            state = newState;
+            Debug.Log("Transitioned to state: " + newState);
+        }
     }
 }

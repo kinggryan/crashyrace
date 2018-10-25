@@ -8,8 +8,11 @@ public class DummyDestinationState : DriverDecisionLayer.State {
     public Vector3[] points;
     private int currentPointIndex = 0;
 
-    public DummyDestinationState(DriverSteeringLayer steeringLayer, DriverDecisionLayer decisionLayer) : base(steeringLayer, decisionLayer)
-    { }
+    public DummyDestinationState(DriverSteeringLayer steeringLayer, DriverDecisionLayer decisionLayer, Vector3[] points) : base(steeringLayer, decisionLayer)
+    {
+        this.points = points;
+        steeringLayer.SetDestination(points[currentPointIndex]);
+    }
 
     // Update is called once per frame
     public override DriverDecisionLayer.State Update () {
@@ -20,4 +23,14 @@ public class DummyDestinationState : DriverDecisionLayer.State {
         }
         return null;
 	}
+
+    public override DriverDecisionLayer.State DidDropPickup(Pickup pickup)
+    {
+        if(pickup is OrbPickup)
+        {
+            return new DriverDecisionStatePursuit(steeringLayer, decisionLayer, pickup.transform);
+        }
+
+        return null;
+    }
 }
