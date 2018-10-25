@@ -5,7 +5,6 @@ using UnityEngine;
 public class GrapplerCharacterController : MonoBehaviour {
 
     public Rigidbody car;
-    public MouseLook mouseLook;
     public Camera cam;
 
     public Vector3[] movementPointsRelativeToCar;
@@ -14,6 +13,8 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     public float stationEntranceSpeed = 2f;
     public float stationUseDistance = 0.2f;
+
+    public GrapplerInput input;
 
     private Vector3 forwardRelativeToCar;
     private Vector3 upwardRelativeToCar;
@@ -25,12 +26,6 @@ public class GrapplerCharacterController : MonoBehaviour {
     private Vector3 positionRelativeToCar;
 
     // Use this for initialization
-    private void Awake()
-    {
-        mouseLook = new MouseLook();
-        mouseLook.Init(cam.transform);
-    }
-
     void Start () {
         forwardRelativeToCar = car.transform.InverseTransformDirection(transform.forward);
         upwardRelativeToCar = car.transform.InverseTransformDirection(transform.up);
@@ -109,11 +104,11 @@ public class GrapplerCharacterController : MonoBehaviour {
         {
             selectedAttachment.Highlight();
 
-            if (Input.GetButtonDown("Fire1") && selectedAttachment.IsUseable())
+            if(input.GetUseButtonDown() && selectedAttachment.IsUseable())
             {
                 selectedAttachment.Use(this);
             }
-            if(Input.GetButtonUp("Fire1") && selectedAttachment.beingUsed)
+            if(input.GetUseButtonUp() && selectedAttachment.beingUsed)
             {
                 selectedAttachment.EndUseManual();
             }
@@ -122,11 +117,11 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     void UpdateAttachmentUseInStation()
     {
-        if (Input.GetButtonDown("Fire1") && selectedAttachment.IsUseable())
+        if (input.GetUseButtonDown() && selectedAttachment.IsUseable())
         {
             selectedAttachment.Use(this);
         }
-        if (Input.GetButtonUp("Fire1") && selectedAttachment.beingUsed)
+        if (input.GetUseButtonUp() && selectedAttachment.beingUsed)
         {
             selectedAttachment.EndUseManual();
         }
@@ -136,7 +131,7 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     void UpdateMovement()
     {
-        var movement = movementSpeed * -Input.GetAxis("Horizontal");
+        var movement = movementSpeed * -input.GetHorizontalInput();
         movementPointPosition += movement * Time.deltaTime;
         if (movementPointPosition < 0)
         {
@@ -152,7 +147,7 @@ public class GrapplerCharacterController : MonoBehaviour {
     void UpdateLookDirection()
     {
         transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
-        mouseLook.LookRotation(transform, cam.transform);
+        
     }
 
     void UpdateMovementInStation()

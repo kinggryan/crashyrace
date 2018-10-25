@@ -7,6 +7,7 @@ public class CarAttachment : MonoBehaviour {
     public bool continuous;
 
     private new Renderer renderer;
+    [SerializeField]
     protected Color unhighlightedColor = Color.yellow;
     protected Color highlightedColor = Color.cyan;
     protected Color usedColor = Color.green;

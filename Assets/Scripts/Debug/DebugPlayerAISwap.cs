@@ -10,6 +10,7 @@ public class DebugPlayerAISwap : MonoBehaviour {
     public MonoBehaviour playerController;
     public MonoBehaviour aiController;
     public SimpleCarController carController;
+    public GrapplerCharacterController grapplerController;
     public bool isStartingPlayer = false;
 
     private static DebugPlayerAISwap currentPlayer;
@@ -46,6 +47,8 @@ public class DebugPlayerAISwap : MonoBehaviour {
         {
             carController.input = playerController.GetComponent<ICarControlInput>();
         }
+        if (grapplerController != null)
+            grapplerController.input = (GrapplerInput)playerController;
         cam.enabled = true;
     }
 
@@ -59,6 +62,8 @@ public class DebugPlayerAISwap : MonoBehaviour {
         {
             carController.input = aiController.GetComponent<ICarControlInput>();
         }
+        if (grapplerController != null)
+            grapplerController.input = (GrapplerInput)aiController;
         cam.enabled = false;
     }
 }

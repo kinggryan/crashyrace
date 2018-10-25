@@ -12,6 +12,7 @@ public class Car : MonoBehaviour {
     }
 
     public Rigidbody rbody;
+    public Collider carBodyCollider;
     public SimpleCarController carController;
     public float maxHP = 100f;
     public HPBracket[] hpBrackets;
@@ -21,7 +22,7 @@ public class Car : MonoBehaviour {
     public GameObject damagePrefab;
 
     float hp;
-    private CarDamage[] currentDamageObject;
+    private List<CarDamage> damageObjects = new List<CarDamage>();
 
 	// Use this for initialization
 	void Awake () {
@@ -39,6 +40,47 @@ public class Car : MonoBehaviour {
             ExplodeAtPoint(point);
             UpdateStatsForHPBracket(newBracket);
         }
+
+        if(damageObjects.Count == 0)
+        {
+            CreateDamageObject(point, damage);
+        } else
+        {
+            var remainingDamage = damageObjects[damageObjects.Count - 1].TakeDamage(damage);
+            if(remainingDamage > 0)
+            {
+                CreateDamageObject(point, remainingDamage);
+            }
+        }
+    }
+
+    public void RepairDamage(float damage)
+    {
+        hp += damage;
+    }
+
+    public void RemoveDamageObject(CarDamage obj)
+    {
+        for(var i = 0; i < damageObjects.Count; i++)
+        {
+            if(damageObjects[i] == obj)
+            {
+                damageObjects.RemoveAt(i);
+                break;
+            }
+        }
+        GameObject.Destroy(obj.gameObject);
+    }
+
+    private void CreateDamageObject(Vector3 point, float damage)
+    {
+        // Move the point slightly further out so its not like inside the car
+        var extrudedPoint = carBodyCollider.ClosestPoint(point);
+        extrudedPoint += 0.5f * (point - rbody.transform.position).normalized;
+        var newDamageObject = GameObject.Instantiate(damagePrefab, extrudedPoint, Quaternion.identity, transform);
+        var newDamage = newDamageObject.GetComponent<CarDamage>();
+        newDamage.Init(damage, this);
+        damageObjects.Add(newDamage);
     }
 
     private void UpdateStatsForHPBracket(HPBracket bracket)
