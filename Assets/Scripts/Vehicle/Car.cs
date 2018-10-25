@@ -23,6 +23,7 @@ public class Car : MonoBehaviour {
 
     float hp;
     private List<CarDamage> damageObjects = new List<CarDamage>();
+    private List<Pickup> pickups = new List<Pickup>();
 
 	// Use this for initialization
 	void Awake () {
@@ -52,6 +53,11 @@ public class Car : MonoBehaviour {
                 CreateDamageObject(point, remainingDamage);
             }
         }
+
+        foreach(var p in pickups)
+        {
+            p.TakeDamage(damage, hp);
+        }
     }
 
     public void RepairDamage(float damage)
@@ -72,11 +78,28 @@ public class Car : MonoBehaviour {
         GameObject.Destroy(obj.gameObject);
     }
 
+    public void AcquirePickup(Pickup pickup)
+    {
+        // Disable the pickup's trigger
+        // Place it in the center of the vehicle
+        pickup.SetPickupEnabled(false);
+        pickup.AttachToCar(this, 5 * Vector3.up);
+        pickups.Add(pickup);
+    }
+
+    public void DropPickup(Pickup pickup)
+    {
+        Debug.Log("Dropped");
+        pickup.SetPickupEnabled(true);
+        pickup.RemoveFromCar();
+        pickups.Remove(pickup);
+    }
+
     private void CreateDamageObject(Vector3 point, float damage)
     {
         // Move the point slightly further out so its not like inside the car
         var extrudedPoint = carBodyCollider.ClosestPoint(point);
-        extrudedPoint += 0.5f * (point - rbody.transform.position).normalized;
+        extrudedPoint += 0.75f * (point - rbody.transform.position).normalized;
         var newDamageObject = GameObject.Instantiate(damagePrefab, extrudedPoint, Quaternion.identity, transform);
         var newDamage = newDamageObject.GetComponent<CarDamage>();
         newDamage.Init(damage, this);
@@ -99,7 +122,7 @@ public class Car : MonoBehaviour {
         return hpBrackets[0];
     }
 
-    public void ExplodeAtPoint(Vector3 point)
+    private void ExplodeAtPoint(Vector3 point)
     {
         Debug.Log("Exploding at point " + point);
         // When the explosion happens, we generally want the
