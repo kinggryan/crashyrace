@@ -4,7 +4,15 @@ using UnityEngine;
 
 public class DriverCharacterController : ICarControlInput {
 
-	public override float GetMotorInput()
+    public Camera cam;
+    public MouseLook mouseLook;
+
+    public void Update()
+    {
+        mouseLook.LookRotation(transform, cam.transform);
+    }
+
+    public override float GetMotorInput()
     {
         return Input.GetAxis("Vertical");
     }

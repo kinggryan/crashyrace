@@ -12,10 +12,10 @@ public class SimpleCarController : MonoBehaviour
 
     public Vector3 relativeCenterOfMass;  // The rigidbody center of mass relative to the position of the car
 
+    public ICarControlInput input;
+
     private float previousMotor;
     private new Rigidbody rigidbody;
-    [SerializeField]
-    private ICarControlInput input;
 
     public void Awake()
     {

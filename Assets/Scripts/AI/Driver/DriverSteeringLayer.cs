@@ -16,11 +16,16 @@ public class DriverSteeringLayer : ICarControlInput
 	// Use this for initialization
 	void Awake () {
         path = new NavMeshPath();
+        SetDestination(destination);
+    }
+
+    public void SetDestination(Vector3 destination)
+    {
         NavMeshHit destinationNavMeshPointInfo;
         var foundPoint = NavMesh.SamplePosition(destination, out destinationNavMeshPointInfo, 4f, NavMesh.AllAreas);
         if (!foundPoint)
             Debug.LogError("Couldn't find point at start");
-        destination = destinationNavMeshPointInfo.position;
+        this.destination = destinationNavMeshPointInfo.position;
     }
 	
 	// Update is called once per frame

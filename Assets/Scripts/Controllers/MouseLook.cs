@@ -14,12 +14,10 @@ public class MouseLook
     public float smoothTime = 5f;
     public bool lockCursor = true;
 
-    private Quaternion m_CameraTargetRot;
     private bool m_cursorIsLocked = true;
 
     public void Init(Transform camera)
     {
-        m_CameraTargetRot = camera.localRotation;
     }
 
 
