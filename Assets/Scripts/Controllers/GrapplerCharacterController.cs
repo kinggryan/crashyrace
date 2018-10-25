@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class GrapplerCharacterController : MonoBehaviour {
 
+    private enum State
+    {
+        Grappling,
+        InStation,
+        SlidingToPosition
+    }
+
     public Rigidbody car;
     public Camera cam;
 
@@ -22,8 +29,11 @@ public class GrapplerCharacterController : MonoBehaviour {
     private float movementPointPosition = 0f;
 
     private CarAttachment selectedAttachment = null;
-    private bool inStation = false;
+    private State state = State.Grappling;
     private Vector3 positionRelativeToCar;
+
+    private Vector3 slidingDestinationRelativeToCar;
+    private State slidingDestinationState;
 
     // Use this for initialization
     void Start () {
@@ -33,11 +43,14 @@ public class GrapplerCharacterController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(inStation)
+        if(state == State.InStation)
         {
             UpdateMovementInStation();
             UpdateAttachmentUseInStation();
 
+        } else if(state == State.SlidingToPosition)
+        {
+            UpdateSlidingMovement();
         } else
         {
             UpdateMovement();
@@ -144,6 +157,19 @@ public class GrapplerCharacterController : MonoBehaviour {
         UpdateLookDirection();
     }
 
+    void UpdateSlidingMovement()
+    {
+        if(SlidingReachedDestination())
+        {
+            transform.position = car.transform.TransformPoint(slidingDestinationRelativeToCar);
+            state = slidingDestinationState;
+        } else
+        {
+            var currentPosition = positionRelativeToCar;
+            transform.position = car.transform.TransformPoint(Vector3.MoveTowards(currentPosition, slidingDestinationRelativeToCar, stationEntranceSpeed * Time.deltaTime));
+        }
+    }
+
     void UpdateLookDirection()
     {
         transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
@@ -152,14 +178,20 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     void UpdateMovementInStation()
     {
-        if (!FullyInStation())
+        transform.position = selectedAttachment.transform.position;
+
+        // Exit the station if the player is trying to move
+        var inputVector = new Vector3(input.GetHorizontalInput(), 0, input.GetVerticalInput());
+        if(inputVector.magnitude > 0.5f)
         {
-            var currentPosition = positionRelativeToCar;
-            var targetPosition = car.transform.InverseTransformPoint(selectedAttachment.transform.position);
-            transform.position = car.transform.TransformPoint(Vector3.MoveTowards(currentPosition, targetPosition, stationEntranceSpeed * Time.deltaTime));
-        } else
-        {
-            transform.position = selectedAttachment.transform.position;
+            var movementDirectionCarSpace = Quaternion.FromToRotation(car.transform.forward, cam.transform.forward) * inputVector.normalized;
+            var outputPos = CastAgainstCarMovementPoints(car.transform.InverseTransformPoint(transform.position), movementDirectionCarSpace);
+            var outputPosReal = GetCarRelativePositionForMovementPointPosition(outputPos);
+
+            state = State.SlidingToPosition;
+            slidingDestinationState = State.Grappling;
+            slidingDestinationRelativeToCar = outputPosReal;
+            movementPointPosition = outputPos;
         }
 
         UpdateLookDirection();
@@ -167,13 +199,48 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     public void EnterStation(CarAttachment station)
     {
-        inStation = true;
+        state = State.SlidingToPosition;
+        slidingDestinationState = State.InStation;
+        slidingDestinationRelativeToCar = car.transform.InverseTransformPoint(station.transform.position);
         selectedAttachment = station;
     }
 
-    bool FullyInStation()
+    bool SlidingReachedDestination()
     {
-        var targetPosition = selectedAttachment.transform.position;
-        return Vector3.Distance(targetPosition, transform.position) < stationUseDistance;
+        return Vector3.Distance(slidingDestinationRelativeToCar, car.transform.InverseTransformPoint(transform.position)) < stationUseDistance;
+    }
+
+    // This function determines a point along the path created by the car's movement points that intersects with a ray cast from starting position in direction. 
+    // In this case, all vectors are in car-space and projected onto the car's steering plane
+    private float CastAgainstCarMovementPoints(Vector3 startingPosition, Vector3 direction)
+    {
+        var projectedStartingPos = startingPosition;
+        projectedStartingPos.y = 0;
+        var projectedDirection = direction;
+        projectedDirection.y = 0;
+
+        var ray = new Ray(projectedStartingPos, projectedDirection);
+        var distanceTotal = 0f;
+
+        for(var i = 0; i < movementPointsRelativeToCar.Length; i++) { 
+            var currentPoint = movementPointsRelativeToCar[i];
+            currentPoint.y = 0;
+            var nextPoint = movementPointsRelativeToCar[(i + 1) % movementPointsRelativeToCar.Length];
+            nextPoint.y = 0;
+
+            var upPoint = currentPoint + Vector3.up;
+
+            var plane = new Plane(currentPoint, nextPoint, upPoint);
+            float distance;
+            if(plane.Raycast(ray, out distance))
+            {
+                var collisionPoint = ray.origin + distance * ray.direction.normalized;
+                return distanceTotal + Vector3.Distance(currentPoint, collisionPoint);
+            }
+
+            distanceTotal += Vector3.Distance(currentPoint, nextPoint);
+        }
+
+        return 0;
     }
 }
