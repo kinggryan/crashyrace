@@ -41,14 +41,29 @@ public class DriverSteeringLayer : ICarControlInput
             Debug.LogError("Error finding path...");
 
         // Calculate angle between our current velocity and the vector towards the destination, projected onto the vector of the car's steering plane
-        var desiredMovementVector = path.corners[Mathf.Max(1,path.corners.Length-1)] - car.position;
-        var currentMovementVector = car.velocity;
+        var desiredMovementVector = path.corners[Mathf.Min(1,path.corners.Length-1)] - car.position;
+        var currentMovementVector = car.transform.forward;
             
         var correctedDesiredMovementVector = Vector3.ProjectOnPlane(desiredMovementVector, car.transform.up);
         var correctedCurrentMovementVector = Vector3.ProjectOnPlane(currentMovementVector, car.transform.up);
         var steeringAngle = Vector3.SignedAngle(correctedCurrentMovementVector, correctedDesiredMovementVector, car.transform.up);
+        Debug.Log("Steering angle: " + steeringAngle);
         steeringValue = Mathf.Clamp(steeringAngle / maxTurnAngle, -1, 1);
 	}
+
+    // Draw the nav path
+    private void OnDrawGizmosSelected()
+    {
+        for(var i = 0; i < path.corners.Length-1; i++)
+        {
+            Gizmos.DrawLine(path.corners[i], path.corners[i + 1]);
+        }
+
+        if(path.corners.Length > 1)
+        {
+            Gizmos.DrawWireSphere(path.corners[Mathf.Min(1, path.corners.Length - 1)], 1f);
+        }
+    }
 
     public override float GetMotorInput()
     {
