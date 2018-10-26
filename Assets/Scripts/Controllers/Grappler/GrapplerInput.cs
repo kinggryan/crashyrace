@@ -23,4 +23,9 @@ public class GrapplerInput : MonoBehaviour {
     {
         return false;
     }
+
+    public virtual bool ShouldLockRotationToCar()
+    {
+        return false;
+    }
 }

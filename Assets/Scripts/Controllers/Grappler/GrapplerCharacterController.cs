@@ -172,8 +172,9 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     void UpdateLookDirection()
     {
-        transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardRelativeToCar), car.transform.TransformDirection(upwardRelativeToCar));
-        
+        var forwardLookDir = -positionRelativeToCar.normalized;
+        forwardLookDir.y = 0;
+        transform.rotation = Quaternion.LookRotation(car.transform.TransformDirection(forwardLookDir), car.transform.TransformDirection(upwardRelativeToCar));
     }
 
     void UpdateMovementInStation()
@@ -192,6 +193,13 @@ public class GrapplerCharacterController : MonoBehaviour {
             slidingDestinationState = State.Grappling;
             slidingDestinationRelativeToCar = outputPosReal;
             movementPointPosition = outputPos;
+
+            // If this is a player, free their looking
+            if (input is GrapplerPlayerInput)
+            {
+                var castInput = (GrapplerPlayerInput)input;
+                castInput.controllerLook.clampHorizontalLook = true;
+            }
         }
 
         UpdateLookDirection();
@@ -203,6 +211,13 @@ public class GrapplerCharacterController : MonoBehaviour {
         slidingDestinationState = State.InStation;
         slidingDestinationRelativeToCar = car.transform.InverseTransformPoint(station.transform.position);
         selectedAttachment = station;
+
+        // If this is a player, free their looking
+        if(input is GrapplerPlayerInput)
+        {
+            var castInput = (GrapplerPlayerInput)input;
+            castInput.controllerLook.clampHorizontalLook = false;
+        }
     }
 
     bool SlidingReachedDestination()

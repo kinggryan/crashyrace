@@ -6,16 +6,14 @@ public class DriverCharacterController : ICarControlInput {
 
     public Camera cam;
     public MouseLook mouseLook;
-    public float maxControllerLookAngle = 90;
-    public float controllerLookSpeed = 15f;
+    public ControllerLook controllerLook;
     public int playerNum;
     public bool controllerMode;
     
-
     public void Update()
     {
         if (controllerMode)
-            UpdateLookDirectionForController();
+            controllerLook.LookRotation(cam, playerNum);
         else
             mouseLook.LookRotation(transform, cam.transform);
     }
@@ -40,13 +38,5 @@ public class DriverCharacterController : ICarControlInput {
             return Input.GetAxis("ActionB_" + playerNum);
         else
             return (Input.GetButton("Brake") ? 1 : 0);
-    }
-
-    void UpdateLookDirectionForController()
-    {
-        var desiredHorizontalLookDirection = maxControllerLookAngle*Input.GetAxis("LookHorizontal_" + playerNum);
-        var desiredVerticalLookDirection = maxControllerLookAngle * Input.GetAxis("LookVertical_" + playerNum);
-        var desiredRotation = Quaternion.AngleAxis(desiredHorizontalLookDirection, Vector3.up) * Quaternion.AngleAxis(-desiredVerticalLookDirection, Vector3.right);
-        cam.transform.localRotation = Quaternion.RotateTowards(cam.transform.localRotation, desiredRotation, controllerLookSpeed * Time.deltaTime);
     }
 }
