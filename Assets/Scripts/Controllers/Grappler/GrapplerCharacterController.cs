@@ -26,7 +26,8 @@ public class GrapplerCharacterController : MonoBehaviour {
     private Vector3 forwardRelativeToCar;
     private Vector3 upwardRelativeToCar;
 
-    private float movementPointPosition = 0f;
+    [HideInInspector]
+    public float movementPointPosition = 0f;
 
     private CarAttachment selectedAttachment = null;
     private State state = State.Grappling;
@@ -81,17 +82,7 @@ public class GrapplerCharacterController : MonoBehaviour {
         Debug.LogError("There was a problem getting the movement position");
         return transform.position;
     }
-
-    float GetMovementPointMaxDistance()
-    {
-        var runningTotal = 0f;
-        for(var i = 0; i < movementPointsRelativeToCar.Length; i++)
-        {
-            runningTotal += Vector3.Distance(movementPointsRelativeToCar[i], movementPointsRelativeToCar[(i + 1) % movementPointsRelativeToCar.Length]);
-        }
-        return runningTotal;
-    }
-
+    
     CarAttachment GetAttachmentToUse()
     {
         RaycastHit hitInfo;
@@ -225,9 +216,12 @@ public class GrapplerCharacterController : MonoBehaviour {
         return Vector3.Distance(slidingDestinationRelativeToCar, car.transform.InverseTransformPoint(transform.position)) < stationUseDistance;
     }
 
+
+    // Movement Utilities
+
     // This function determines a point along the path created by the car's movement points that intersects with a ray cast from starting position in direction. 
     // In this case, all vectors are in car-space and projected onto the car's steering plane
-    private float CastAgainstCarMovementPoints(Vector3 startingPosition, Vector3 direction)
+    public float CastAgainstCarMovementPoints(Vector3 startingPosition, Vector3 direction)
     {
         var projectedStartingPos = startingPosition;
         projectedStartingPos.y = 0;
@@ -258,4 +252,49 @@ public class GrapplerCharacterController : MonoBehaviour {
 
         return 0;
     }
+
+    public float GetClosestMovementPositionForWorldSpacePoint(Vector3 point)
+    {
+        var projectedStartingPos = car.transform.InverseTransformPoint(point);
+        projectedStartingPos.y = 0;
+
+        var distanceTotal = 0f;
+
+        Vector3 closestPoint = new Vector3(Mathf.Infinity, 0, 0);
+        var movementPos = 0f;
+
+        for (var i = 0; i < movementPointsRelativeToCar.Length; i++)
+        {
+            var currentPoint = movementPointsRelativeToCar[i];
+            currentPoint.y = 0;
+            var nextPoint = movementPointsRelativeToCar[(i + 1) % movementPointsRelativeToCar.Length];
+            nextPoint.y = 0;
+
+            var upPoint = currentPoint + Vector3.up;
+
+            var plane = new Plane(currentPoint, nextPoint, upPoint);
+
+            var closestPointForPlane = plane.ClosestPointOnPlane(projectedStartingPos);
+            if (Vector3.Distance(closestPointForPlane, point) < Vector3.Distance(closestPoint, point))
+            {
+                closestPoint = closestPointForPlane;
+                movementPos = distanceTotal + Vector3.Distance(currentPoint, closestPoint);
+            }
+
+            distanceTotal += Vector3.Distance(currentPoint, nextPoint);
+        }
+
+        return movementPos;
+    }
+
+    public float GetMovementPointMaxDistance()
+    {
+        var runningTotal = 0f;
+        for (var i = 0; i < movementPointsRelativeToCar.Length; i++)
+        {
+            runningTotal += Vector3.Distance(movementPointsRelativeToCar[i], movementPointsRelativeToCar[(i + 1) % movementPointsRelativeToCar.Length]);
+        }
+        return runningTotal;
+    }
+
 }
