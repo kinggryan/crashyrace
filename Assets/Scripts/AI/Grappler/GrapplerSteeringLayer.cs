@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IGrapplerSteeringLayerDelegate
+{
+    void DidCompleteAllSteeringInstructions();
+}
+
 public class GrapplerSteeringLayer : GrapplerInput
 {
     // Currently the steering states the grappler may want to perform are:
@@ -36,10 +41,12 @@ public class GrapplerSteeringLayer : GrapplerInput
     private State state;
     private List<State> nextStates = new List<State>();
 
+    [HideInInspector]
+    public IGrapplerSteeringLayerDelegate del;
+
     private void Awake()
     {
-        state = new GrapplerSteeringStateUseAttachment(controller, cam, turretPlatform);
-        nextStates.Add(new GrapplerSteeringStateFireAtTarget(controller, cam, enemyCar.rbody));
+        state = new GrapplerSteeringStateIdle(controller, cam);
     }
 
     public override float GetHorizontalInput()
@@ -67,6 +74,15 @@ public class GrapplerSteeringLayer : GrapplerInput
         return state.GetAttachmentToUse();
     }
 
+    // Steering Layer
+
+    public void SetInstructions(List<State> states)
+    {
+        state = states[0];
+        states.RemoveAt(0);
+        nextStates = states;
+    }
+
     void DidEnterStation(CarAttachment station)
     {
         state.DidEnterStation(station);
@@ -79,6 +95,9 @@ public class GrapplerSteeringLayer : GrapplerInput
         {
             state = nextStates[0];
             nextStates.RemoveAt(0);
+        } else
+        {
+            del.DidCompleteAllSteeringInstructions();
         }
     }
 }

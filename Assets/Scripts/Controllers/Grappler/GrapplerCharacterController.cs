@@ -27,13 +27,18 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     [HideInInspector]
     public float movementPointPosition = 0f;
-
-    private CarAttachment selectedAttachment = null;
+    [HideInInspector]
+    public CarAttachment selectedAttachment { get; private set; }
     private State state = State.Grappling;
     private Vector3 positionRelativeToCar;
 
     private Vector3 slidingDestinationRelativeToCar;
     private State slidingDestinationState;
+
+    void Awake()
+    {
+        selectedAttachment = null;
+    }
 
     // Use this for initialization
     void Start () {
