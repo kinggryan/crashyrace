@@ -16,7 +16,6 @@ public class GrapplerCharacterController : MonoBehaviour {
 
     public Vector3[] movementPointsRelativeToCar;
     public float movementSpeed;
-    public float maxUseDistance = 1f;
 
     public float stationEntranceSpeed = 2f;
     public float stationUseDistance = 0.2f;
@@ -85,14 +84,7 @@ public class GrapplerCharacterController : MonoBehaviour {
     
     CarAttachment GetAttachmentToUse()
     {
-        RaycastHit hitInfo;
-        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hitInfo, maxUseDistance, LayerMask.NameToLayer("attachments")))
-        {
-            var attachment = hitInfo.collider.GetComponent<CarAttachment>();
-            return attachment;
-        }
-
-        return null;
+        return input.GetAttachmentToUse();
     }
 
     void UpdateAttachmentUse()
@@ -209,6 +201,8 @@ public class GrapplerCharacterController : MonoBehaviour {
             var castInput = (GrapplerPlayerInput)input;
             castInput.controllerLook.clampHorizontalLook = false;
         }
+
+        BroadcastMessage("DidEnterStation", station, SendMessageOptions.DontRequireReceiver);
     }
 
     bool SlidingReachedDestination()
@@ -296,5 +290,4 @@ public class GrapplerCharacterController : MonoBehaviour {
         }
         return runningTotal;
     }
-
 }

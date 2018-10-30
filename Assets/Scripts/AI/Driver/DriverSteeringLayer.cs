@@ -47,7 +47,7 @@ public class DriverSteeringLayer : ICarControlInput
         var correctedDesiredMovementVector = Vector3.ProjectOnPlane(desiredMovementVector, car.transform.up);
         var correctedCurrentMovementVector = Vector3.ProjectOnPlane(currentMovementVector, car.transform.up);
         var steeringAngle = Vector3.SignedAngle(correctedCurrentMovementVector, correctedDesiredMovementVector, car.transform.up);
-        Debug.Log("Steering angle: " + steeringAngle);
+
         steeringValue = Mathf.Clamp(steeringAngle / maxTurnAngle, -1, 1);
 	}
 

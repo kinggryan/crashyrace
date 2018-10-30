@@ -8,6 +8,7 @@ public class GrapplerPlayerInput : GrapplerInput {
     public MouseLook mouseLook;
     public ControllerLook controllerLook;
     public int playerNum;
+    public float maxUseDistance = 2f;
     public bool controllerMode;
 
     // Use this for initialization
@@ -59,5 +60,16 @@ public class GrapplerPlayerInput : GrapplerInput {
     public override bool ShouldLockRotationToCar()
     {
         return controllerMode;
+    }
+    public override CarAttachment GetAttachmentToUse()
+    {
+        RaycastHit hitInfo;
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hitInfo, maxUseDistance, LayerMask.NameToLayer("attachments")))
+        {
+            var attachment = hitInfo.collider.GetComponent<CarAttachment>();
+            return attachment;
+        }
+
+        return null;
     }
 }

@@ -6,6 +6,7 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
 
     private CarAttachment targetAttachment;
     private float targetMovementPosition;
+    private bool usedAttachment;
 
     public GrapplerSteeringStateUseAttachment(GrapplerCharacterController controller, Camera cam, CarAttachment attachment) : base(controller, cam)
     {
@@ -21,8 +22,6 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
 
         // Determine the maxEdgeSpacePos
         var maxLength = controller.GetMovementPointMaxDistance();
-
-        Debug.Log("Current pos :" + currentPos + " other pos :" + targetMovementPosition);
 
         // Determine if its a shorter path to move right or left
         if(targetMovementPosition > currentPos)
@@ -45,7 +44,7 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
 
     public override bool GetUseButtonDown()
     {
-        return false;
+        return usedAttachment;
     }
 
     public override bool GetUseButtonUp()
@@ -53,8 +52,27 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
         return false;
     }
 
-    public override GrapplerSteeringLayer.State Update()
+    public override bool Update()
     {
+        cam.transform.LookAt(targetAttachment.transform.position);
+        if(usedAttachment)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public override CarAttachment GetAttachmentToUse()
+    {
+        var currentPos = controller.movementPointPosition;
+        Debug.Log("Distance " + Mathf.Abs(currentPos - targetMovementPosition));
+        if (Mathf.Abs(currentPos - targetMovementPosition) < 0.2f)
+        {
+            Debug.Log("Using!");
+            usedAttachment = true;
+            return targetAttachment;
+        }
+
         return null;
     }
 }

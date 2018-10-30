@@ -28,4 +28,9 @@ public class GrapplerInput : MonoBehaviour {
     {
         return false;
     }
+
+    public virtual CarAttachment GetAttachmentToUse()
+    {
+        return null;
+    }
 }

@@ -21,18 +21,25 @@ public class GrapplerSteeringLayer : GrapplerInput
         public abstract float GetVerticalInput();
         public abstract bool GetUseButtonDown();
         public abstract bool GetUseButtonUp();
-        public abstract State Update();
+        public abstract bool Update();
+        public virtual CarAttachment GetAttachmentToUse() { return null; }
+
+        public virtual void DidEnterStation(CarAttachment station) { }
     }
     
     public GrapplerCharacterController controller;
     public Camera cam;
+    // The turret platform and enemy car are both debug properties - a higher layer should be making decisions about what actions to prioritize and sending those actions to this layer
     public CarAttachment turretPlatform;
+    public Car enemyCar;
 
     private State state;
+    private List<State> nextStates = new List<State>();
 
     private void Awake()
     {
         state = new GrapplerSteeringStateUseAttachment(controller, cam, turretPlatform);
+        nextStates.Add(new GrapplerSteeringStateFireAtTarget(controller, cam, enemyCar.rbody));
     }
 
     public override float GetHorizontalInput()
@@ -55,12 +62,23 @@ public class GrapplerSteeringLayer : GrapplerInput
         return state.GetUseButtonUp();
     }
 
+    public override CarAttachment GetAttachmentToUse()
+    {
+        return state.GetAttachmentToUse();
+    }
+
+    void DidEnterStation(CarAttachment station)
+    {
+        state.DidEnterStation(station);
+    }
+
     private void Update()
     {
-        var newState = state.Update();
-        if(newState != null)
+        var goToNextState = state.Update();
+        if(goToNextState && nextStates.Count > 0)
         {
-            state = newState;
+            state = nextStates[0];
+            nextStates.RemoveAt(0);
         }
     }
 }
