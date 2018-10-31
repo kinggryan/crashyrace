@@ -38,7 +38,9 @@ public class GrapplerDecisionLayer : MonoBehaviour, IGrapplerSteeringLayerDelega
     // Use this for initialization
     void Awake () {
         var fireAtEnemyAction = new GrapplerDecisionLayerActionFireAtEnemy(car, controller, enemyCar, turret, turretBase);
+        var repairAction = new GrapplerDecisionLayerActionRepair(car, controller);
         actions.Add(fireAtEnemyAction);
+        actions.Add(repairAction);
 
         steeringLayer.del = this;
 	}
@@ -74,6 +76,9 @@ public class GrapplerDecisionLayer : MonoBehaviour, IGrapplerSteeringLayerDelega
         }
 
         // If this is a high enough priority to exceed the threshold, then change our action
+        // Question: Should the priority transition threshold not apply when the current action's priority is 0 or less than 0? 
+        // That way actions can inform the decision layer that they are not needed at all, so if you end up with all actions with a priority less than the threshold, 
+        // at least it will transition off of utterly pointless actions.
         if(tempMaxActionPriority > currentActionPriority + priorityTransitionThreshold)
         {
             currentAction = tempMaxAction;

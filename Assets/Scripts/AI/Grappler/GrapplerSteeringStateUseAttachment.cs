@@ -54,6 +54,10 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
 
     public override bool Update()
     {
+        // If for some reason the target attachment has been destroyed, we should move to the next instruction
+        if (targetAttachment == null)
+            return true;
+
         cam.transform.LookAt(targetAttachment.transform.position);
         if(usedAttachment)
         {
@@ -65,10 +69,10 @@ public class GrapplerSteeringStateUseAttachment : GrapplerSteeringLayer.State {
     public override CarAttachment GetAttachmentToUse()
     {
         var currentPos = controller.movementPointPosition;
-        Debug.Log("Distance " + Mathf.Abs(currentPos - targetMovementPosition));
+        //Debug.Log("Distance from " + targetAttachment + ": " + Mathf.Abs(currentPos - targetMovementPosition));
         if (Mathf.Abs(currentPos - targetMovementPosition) < 0.2f)
         {
-            Debug.Log("Using!");
+            Debug.Log("Using: " + targetAttachment);
             usedAttachment = true;
             return targetAttachment;
         }

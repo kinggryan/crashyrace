@@ -137,6 +137,9 @@ public class GrapplerCharacterController : MonoBehaviour {
         if (movementPointPosition < 0)
         {
             movementPointPosition += GetMovementPointMaxDistance();
+        } else if(movementPointPosition > GetMovementPointMaxDistance())
+        {
+            movementPointPosition -= GetMovementPointMaxDistance();
         }
         var positionRelativeToCar = GetCarRelativePositionForMovementPointPosition(movementPointPosition);
 

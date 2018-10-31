@@ -15,20 +15,28 @@ public class Car : MonoBehaviour {
     public Collider carBodyCollider;
     public SimpleCarController carController;
     public float maxHP = 100f;
+    [HideInInspector]
+    public float hp { get; private set; }
     public HPBracket[] hpBrackets;
 
     public float outOfHPExplosionForce;
 
     public GameObject damagePrefab;
-
-    float hp;
-    private List<CarDamage> damageObjects = new List<CarDamage>();
+    
+    [HideInInspector]
+    public List<CarDamage> damageObjects { get; private set; }
     private List<Pickup> pickups = new List<Pickup>();
+
+    private static List<Car> allCars;
 
 	// Use this for initialization
 	void Awake () {
         hp = maxHP;
-	}
+        if (allCars == null)
+            allCars = new List<Car>();
+        allCars.Add(this);
+        damageObjects = new List<CarDamage>();
+    }
 	
 	public void TakeDamage(Vector3 point, Vector3 direction, float damage)
     {
@@ -67,14 +75,7 @@ public class Car : MonoBehaviour {
 
     public void RemoveDamageObject(CarDamage obj)
     {
-        for(var i = 0; i < damageObjects.Count; i++)
-        {
-            if(damageObjects[i] == obj)
-            {
-                damageObjects.RemoveAt(i);
-                break;
-            }
-        }
+        damageObjects.Remove(obj);
         GameObject.Destroy(obj.gameObject);
     }
 
@@ -97,6 +98,31 @@ public class Car : MonoBehaviour {
         pickups.Remove(pickup);
 
         BroadcastMessage("DidDropPickup", pickup, SendMessageOptions.DontRequireReceiver);
+    }
+
+    public List<Car> OtherCars()
+    {
+        var cars = new List<Car>(allCars);
+        cars.Remove(this);
+        return cars;
+    }
+
+    public Car ClosestEnemyCar()
+    {
+        var otherCars = OtherCars();
+        Car closestCar = null;
+        var closestDistance = Mathf.Infinity;
+        foreach(var car in otherCars)
+        {
+            var distance = Vector3.Distance(car.transform.position, transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestCar = car;
+            }
+        }
+
+        return closestCar;
     }
 
     private void CreateDamageObject(Vector3 point, float damage)

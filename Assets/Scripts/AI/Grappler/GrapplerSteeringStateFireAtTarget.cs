@@ -33,6 +33,7 @@ public class GrapplerSteeringStateFireAtTarget : GrapplerSteeringLayer.State
         var gravity = Physics.gravity;
         var distance = Vector3.Distance(controller.transform.position, target.position);
         var upwardAngle = Mathf.Rad2Deg*Mathf.Asin(distance * gravity.magnitude / (bulletVelocity* bulletVelocity)) / 2;
+        Debug.Log("Upward angle for " + controller + ": " + upwardAngle);
         
         // Calculate lead tracking
         var enemyVelocitySelfSpace = target.velocity - controller.car.velocity;
