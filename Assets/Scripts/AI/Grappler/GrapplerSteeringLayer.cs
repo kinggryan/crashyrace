@@ -34,9 +34,6 @@ public class GrapplerSteeringLayer : GrapplerInput
     
     public GrapplerCharacterController controller;
     public Camera cam;
-    // The turret platform and enemy car are both debug properties - a higher layer should be making decisions about what actions to prioritize and sending those actions to this layer
-    public CarAttachment turretPlatform;
-    public Car enemyCar;
 
     private State state;
     private List<State> nextStates = new List<State>();

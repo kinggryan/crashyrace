@@ -25,7 +25,6 @@ public class GrapplerDecisionLayer : MonoBehaviour, IGrapplerSteeringLayerDelega
     public GrapplerSteeringLayer steeringLayer;
     public Car car;
     public GrapplerCharacterController controller;
-    public Rigidbody enemyCar;
     public CarAttachment turret;
     public CarAttachment turretBase;
 
@@ -36,13 +35,19 @@ public class GrapplerDecisionLayer : MonoBehaviour, IGrapplerSteeringLayerDelega
     const float priorityTransitionThreshold = 10;
 
     // Use this for initialization
-    void Awake () {
-        var fireAtEnemyAction = new GrapplerDecisionLayerActionFireAtEnemy(car, controller, enemyCar, turret, turretBase);
-        var repairAction = new GrapplerDecisionLayerActionRepair(car, controller);
-        actions.Add(fireAtEnemyAction);
-        actions.Add(repairAction);
-
+    void Awake()
+    {
         steeringLayer.del = this;
+    }
+
+    void Start () {
+        foreach(var enemyCar in car.OtherCars())
+        {
+            var fireAtEnemyAction = new GrapplerDecisionLayerActionFireAtEnemy(car, controller, enemyCar.rbody, turret, turretBase);
+            actions.Add(fireAtEnemyAction);
+        }
+        var repairAction = new GrapplerDecisionLayerActionRepair(car, controller);
+        actions.Add(repairAction);
 	}
 	
 	// Update is called once per frame

@@ -70,7 +70,13 @@ public class Car : MonoBehaviour {
 
     public void RepairDamage(float damage)
     {
+        var previousBracket = BracketForHP(hp);
         hp += damage;
+        var newBracket = BracketForHP(hp);
+        if (!Mathf.Approximately(newBracket.hp, previousBracket.hp))
+        {
+            UpdateStatsForHPBracket(newBracket);
+        }
     }
 
     public void RemoveDamageObject(CarDamage obj)
