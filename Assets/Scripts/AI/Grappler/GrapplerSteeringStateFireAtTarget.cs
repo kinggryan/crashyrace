@@ -33,7 +33,7 @@ public class GrapplerSteeringStateFireAtTarget : GrapplerSteeringLayer.State
         var gravity = Physics.gravity;
         var distance = Vector3.Distance(controller.transform.position, target.position);
         var upwardAngle = Mathf.Rad2Deg*Mathf.Asin(distance * gravity.magnitude / (bulletVelocity* bulletVelocity)) / 2;
-        Debug.Log("Upward angle for " + controller + ": " + upwardAngle);
+        
         
         // Calculate lead tracking
         var enemyVelocitySelfSpace = target.velocity - controller.car.velocity;
@@ -41,8 +41,11 @@ public class GrapplerSteeringStateFireAtTarget : GrapplerSteeringLayer.State
         horizontalLookTarget.y = controller.transform.position.y;
         var interceptionPoint = Utilities.FirstOrderIntercept(controller.transform.position, Vector3.zero, bulletVelocity, horizontalLookTarget, enemyVelocitySelfSpace);
 
-        cam.transform.LookAt(interceptionPoint);
-        cam.transform.Rotate(cam.transform.right, upwardAngle);
+        Debug.Log("Upward angle for " + controller + ": " + upwardAngle + " with interception point " + interceptionPoint);
+
+        cam.transform.LookAt(interceptionPoint, Vector3.up);
+        //cam.transform.Rotate(Vector3.right, upwardAngle);
+        cam.transform.Rotate(-upwardAngle, 0, 0);
         return false;
     }
 
