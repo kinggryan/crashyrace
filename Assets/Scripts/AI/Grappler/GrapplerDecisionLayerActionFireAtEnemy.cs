@@ -9,6 +9,7 @@ public class GrapplerDecisionLayerActionFireAtEnemy : GrapplerDecisionLayer.Acti
     CarAttachment turret;
     const float maxPriorityDistance = 10f;
     const float minPriorityDistance = 100f;
+    const float enemyHasOrbPriorityRatio = 2;
 
     public GrapplerDecisionLayerActionFireAtEnemy(Car car, GrapplerCharacterController controller, Rigidbody target, CarAttachment turret, CarAttachment turretBase) : base(car, controller)
     {
@@ -21,7 +22,8 @@ public class GrapplerDecisionLayerActionFireAtEnemy : GrapplerDecisionLayer.Acti
     {
         var distance = Vector3.Distance(target.position, car.transform.position);
         var scalar = Mathf.Min(1,Mathf.Max(0,(distance - maxPriorityDistance)) / (minPriorityDistance - maxPriorityDistance));
-        return 100 * (1-scalar);
+        var hasOrb = target.GetComponent<Car>().HasOrb();
+        return (hasOrb ? 100 : 100f/enemyHasOrbPriorityRatio) * (1-scalar);
     }
 
     public override void Update()

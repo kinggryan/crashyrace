@@ -71,7 +71,7 @@ public class Car : MonoBehaviour {
     public void RepairDamage(float damage)
     {
         var previousBracket = BracketForHP(hp);
-        hp += damage;
+        hp = Mathf.Min(maxHP, hp + damage);
         var newBracket = BracketForHP(hp);
         if (!Mathf.Approximately(newBracket.hp, previousBracket.hp))
         {
@@ -129,6 +129,19 @@ public class Car : MonoBehaviour {
         }
 
         return closestCar;
+    }
+
+    public bool HasOrb()
+    {
+        foreach(var pickup in pickups)
+        {
+            if(pickup is OrbPickup)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void CreateDamageObject(Vector3 point, float damage)

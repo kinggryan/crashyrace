@@ -26,19 +26,19 @@ public class Pickup : MonoBehaviour {
 
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (car != null)
             transform.position = car.transform.TransformPoint(relativePositionToCar);
     }
 
-    public void AttachToCar(Car car, Vector3 relativePosition)
+    public virtual void AttachToCar(Car car, Vector3 relativePosition)
     {
         this.car = car;
         relativePositionToCar = relativePosition;
     }
 
-    public void RemoveFromCar()
+    public virtual void RemoveFromCar()
     {
         this.car = null;
     }
