@@ -46,7 +46,7 @@ public class Pickup : MonoBehaviour {
 
     public virtual void WasAcquiredByCar(Car car)
     {
-
+        GameObject.Destroy(gameObject);
     }
 
     public void TemporarilyDisableCollisionsWith(Collider col)

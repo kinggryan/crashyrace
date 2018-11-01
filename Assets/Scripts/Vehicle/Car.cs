@@ -26,12 +26,17 @@ public class Car : MonoBehaviour {
     public float outOfHPExplosionForce;
 
     public GameObject damagePrefab;
+    public GameObject scrapPrefab;
     
     [HideInInspector]
     public List<CarDamage> damageObjects { get; private set; }
     private List<Pickup> pickups = new List<Pickup>();
 
     private static List<Car> allCars;
+
+    // When the car takes this much damage, the counter resets and a scrap is spawned
+    private float scrapDropDamageCounter = 10f;
+    private float scrapDropDamageCounterMax = 10f;
 
 	// Use this for initialization
 	void Awake () {
@@ -70,6 +75,13 @@ public class Car : MonoBehaviour {
         foreach(var p in pickups)
         {
             p.TakeDamage(damage, hp);
+        }
+
+        scrapDropDamageCounter -= damage;
+        if(scrapDropDamageCounter <= 0)
+        {
+            scrapDropDamageCounter += scrapDropDamageCounterMax;
+            DropScrap();
         }
     }
 
@@ -121,6 +133,13 @@ public class Car : MonoBehaviour {
         pickups.Remove(pickup);
 
         BroadcastMessage("DidDropPickup", pickup, SendMessageOptions.DontRequireReceiver);
+    }
+
+    public void DropScrap()
+    {
+        var newScrapGameObject = GameObject.Instantiate(scrapPrefab, transform.position, Quaternion.identity);
+        var newScrap = newScrapGameObject.GetComponent<ScrapPickup>();
+        newScrap.TemporarilyDisableCollisionsWith(carBodyCollider);
     }
 
     public void EnteredWaypoint(Waypoint waypoint)

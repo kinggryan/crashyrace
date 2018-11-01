@@ -9,7 +9,8 @@ public class ScrapPickup : Pickup {
     // Use this for initialization
     public override void WasAcquiredByCar(Car car)
     {
+        base.WasAcquiredByCar(car);
+
         car.GainScrap(scrapGain);
-        GameObject.Destroy(gameObject);
     }
 }
