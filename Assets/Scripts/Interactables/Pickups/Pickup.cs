@@ -8,6 +8,7 @@ public class Pickup : MonoBehaviour {
     public Collider collider;
     public Rigidbody rbody;
     public Car car;
+    public bool isAttachable;
 
     private Vector3 relativePositionToCar;
 
@@ -43,6 +44,11 @@ public class Pickup : MonoBehaviour {
         this.car = null;
     }
 
+    public virtual void WasAcquiredByCar(Car car)
+    {
+
+    }
+
     public void TemporarilyDisableCollisionsWith(Collider col)
     {
         Physics.IgnoreCollision(GetComponent<Collider>(), col);
@@ -52,8 +58,10 @@ public class Pickup : MonoBehaviour {
     public void SetPickupEnabled(bool enabled)
     {
         trigger.enabled = enabled;
-        collider.enabled = enabled;
-        rbody.isKinematic = !enabled;
+        if(collider)
+            collider.enabled = enabled;
+        if(rbody)
+            rbody.isKinematic = !enabled;
     }
 
     private IEnumerator EnableCollisions(Collider col, float time)

@@ -84,6 +84,11 @@ public class Car : MonoBehaviour {
         }
     }
 
+    public void GainScrap(float amount)
+    {
+        scrap = Mathf.Min(maxScrap, scrap + amount);
+    }
+
     public void RemoveDamageObject(CarDamage obj)
     {
         damageObjects.Remove(obj);
@@ -95,8 +100,14 @@ public class Car : MonoBehaviour {
         // Disable the pickup's trigger
         // Place it in the center of the vehicle
         pickup.SetPickupEnabled(false);
-        pickup.AttachToCar(this, 5 * Vector3.up);
-        pickups.Add(pickup);
+        if(pickup.isAttachable)
+        {
+            pickup.AttachToCar(this, 5 * Vector3.up);
+            pickups.Add(pickup);
+        } else
+        {
+            pickup.WasAcquiredByCar(this);
+        }
 
         BroadcastMessage("DidAcquirePickup", pickup, SendMessageOptions.DontRequireReceiver);
     }
