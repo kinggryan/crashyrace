@@ -41,7 +41,7 @@ public class GrapplerSteeringStateFireAtTarget : GrapplerSteeringLayer.State
         horizontalLookTarget.y = controller.transform.position.y;
         var interceptionPoint = Utilities.FirstOrderIntercept(controller.transform.position, Vector3.zero, bulletVelocity, horizontalLookTarget, enemyVelocitySelfSpace);
 
-        Debug.Log("Upward angle for " + controller + ": " + upwardAngle + " with interception point " + interceptionPoint);
+        // Debug.Log("Upward angle for " + controller + ": " + upwardAngle + " with interception point " + interceptionPoint);
 
         cam.transform.LookAt(interceptionPoint, Vector3.up);
         //cam.transform.Rotate(Vector3.right, upwardAngle);

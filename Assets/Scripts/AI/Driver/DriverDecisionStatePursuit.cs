@@ -19,8 +19,8 @@ public class DriverDecisionStatePursuit : DriverDecisionLayer.State {
 
     public override DriverDecisionLayer.State DidAcquirePickup(Pickup pickup)
     {
-        // Transition to escape layer
-        var newState = new DummyDestinationState(steeringLayer, decisionLayer, new Vector3[] { new Vector3(100, 0, 410), new Vector3(-100,0,-100), new Vector3(378, 0, 175) });
+        // Transition to going towards waypoints
+        var newState = new DriverDecisionStateWaypoints(steeringLayer, decisionLayer); // new DummyDestinationState(steeringLayer, decisionLayer, new Vector3[] { new Vector3(100, 0, 410), new Vector3(-100,0,-100), new Vector3(378, 0, 175) });
         return newState;
     }
 }

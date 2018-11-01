@@ -6,7 +6,7 @@ public static class Scoreboard {
 
     public static Dictionary<Car, int> points = new Dictionary<Car, int>();
 
-    const int victoryPoints = 1;
+    const int victoryPoints = 5;
 
 	// Use this for initialization
     public static void SetScoreForCar(Car car, int score)

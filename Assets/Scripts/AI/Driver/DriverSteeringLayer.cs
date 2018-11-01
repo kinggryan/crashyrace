@@ -22,7 +22,7 @@ public class DriverSteeringLayer : ICarControlInput
     public void SetDestination(Vector3 destination)
     {
         NavMeshHit destinationNavMeshPointInfo;
-        var foundPoint = NavMesh.SamplePosition(destination, out destinationNavMeshPointInfo, 8f, NavMesh.AllAreas);
+        var foundPoint = NavMesh.SamplePosition(destination, out destinationNavMeshPointInfo, Mathf.Infinity, NavMesh.AllAreas);
         if (!foundPoint)
             Debug.LogError("Couldn't find point at start");
         this.destination = destinationNavMeshPointInfo.position;
