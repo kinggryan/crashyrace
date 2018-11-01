@@ -40,6 +40,7 @@ public class Car : MonoBehaviour {
     private float scrapDropFromOrbTimer = 2f;
     private float scrapDropFromOrbTimerMax = 2f;
     private float scrapGainFromOrbPerSecond = 1f;
+    private float passiveScrapGainPerSecond = 2f;
 
 	// Use this for initialization
 	void Awake () {
@@ -66,6 +67,8 @@ public class Car : MonoBehaviour {
             // Gain scrap over time due to having the orb
             GainScrap(scrapGainFromOrbPerSecond * Time.deltaTime);
         }
+
+        GainScrap(passiveScrapGainPerSecond * Time.deltaTime);
     }
 
     public void TakeDamage(Vector3 point, Vector3 direction, float damage)

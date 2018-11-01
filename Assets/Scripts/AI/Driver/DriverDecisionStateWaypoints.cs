@@ -18,6 +18,13 @@ public class DriverDecisionStateWaypoints : DriverDecisionLayer.State
     // Update is called once per frame
     public override DriverDecisionLayer.State Update()
     {
+        // If we no longer have the orb, go for the orb!
+        // TODO: Probably better to do this as a response to dropping a pickup, not on update, since its more processing than is needed
+        if(!car.HasOrb())
+        {
+            return new DriverDecisionStatePursuit(steeringLayer, decisionLayer, Object.FindObjectOfType<OrbPickup>().transform);
+        }
+        
         if (targetWaypoint == null || !targetWaypoint.IsEnabledForCar(car))
             CalculateTargetWaypoint();
 
