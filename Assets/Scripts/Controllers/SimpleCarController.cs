@@ -9,17 +9,21 @@ public class SimpleCarController : MonoBehaviour
     public float maxBrakeTorque; // Maximum torque the motor can apply when braking
     public float maxSteeringAngle; // maximum steer angle the wheel can have
     public float maxSpeed;
+    public float handbrakeSidewaysFrictionMultiplier = 0.5f;
+    public float handbrakeMaxSteeringAngle;
 
     public Vector3 relativeCenterOfMass;  // The rigidbody center of mass relative to the position of the car
 
     public ICarControlInput input;
 
     private float previousMotor;
+    private float defaultSidewaysFriction;
     private new Rigidbody rigidbody;
 
     public void Awake()
     {
         rigidbody = GetComponent<Rigidbody>();
+        defaultSidewaysFriction = axleInfos[0].leftWheel.sidewaysFriction.stiffness;
     }
 
     public void Start()
@@ -54,8 +58,8 @@ public class SimpleCarController : MonoBehaviour
     public void FixedUpdate()
     {
         float motor = maxMotorTorque * input.GetMotorInput();
-        float steering = maxSteeringAngle * input.GetSteerInput();
-        float brake = maxBrakeTorque * input.GetBrakeInput();
+        float handbrake = input.GetBrakeInput();
+        float steering = Mathf.Lerp(maxSteeringAngle, handbrakeMaxSteeringAngle, handbrake) * input.GetSteerInput();
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -80,8 +84,25 @@ public class SimpleCarController : MonoBehaviour
                 }
             }
 
-            axleInfo.leftWheel.brakeTorque = brake;
-            axleInfo.rightWheel.brakeTorque = brake;
+            // if reversing direction to previous motor, actually just hit the brakes
+            Debug.Log(axleInfo.leftWheel.rpm + " ; " + motor);
+            if(Mathf.Abs(axleInfo.leftWheel.rpm) > 50 && Mathf.Abs(motor) > 0.5f*maxMotorTorque && Mathf.Sign(axleInfo.leftWheel.rpm) != Mathf.Sign(motor))
+                axleInfo.leftWheel.brakeTorque = maxBrakeTorque;
+            else
+                axleInfo.leftWheel.brakeTorque = 0;
+            if (Mathf.Abs(axleInfo.rightWheel.rpm) > 50 && Mathf.Abs(motor) > 0.5f * maxMotorTorque && Mathf.Sign(axleInfo.rightWheel.rpm) != Mathf.Sign(motor))
+                axleInfo.rightWheel.brakeTorque = maxBrakeTorque;
+            else
+                axleInfo.rightWheel.brakeTorque = 0;
+
+            //axleInfo.leftWheel.brakeTorque = brake;
+            //axleInfo.rightWheel.brakeTorque = brake;
+            var sidewaysFriction = axleInfo.leftWheel.sidewaysFriction;
+            sidewaysFriction.stiffness = Mathf.Lerp(defaultSidewaysFriction, defaultSidewaysFriction * handbrakeSidewaysFrictionMultiplier, handbrake);
+            axleInfo.leftWheel.sidewaysFriction = sidewaysFriction;
+            sidewaysFriction = axleInfo.rightWheel.sidewaysFriction;
+            sidewaysFriction.stiffness = Mathf.Lerp(defaultSidewaysFriction, defaultSidewaysFriction * handbrakeSidewaysFrictionMultiplier, handbrake);
+            axleInfo.rightWheel.sidewaysFriction = sidewaysFriction;
 
             ApplyLocalPositionToVisuals(axleInfo.leftWheel);
             ApplyLocalPositionToVisuals(axleInfo.rightWheel);
