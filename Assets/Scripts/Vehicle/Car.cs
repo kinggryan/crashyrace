@@ -11,6 +11,7 @@ public class Car : MonoBehaviour {
         public float maxSpeed;
     }
 
+    public int carNumber;
     public Rigidbody rbody;
     public Collider carBodyCollider;
     public SimpleCarController carController;
@@ -36,6 +37,7 @@ public class Car : MonoBehaviour {
             allCars = new List<Car>();
         allCars.Add(this);
         damageObjects = new List<CarDamage>();
+        Scoreboard.SetScoreForCar(this,0);
     }
 	
 	public void TakeDamage(Vector3 point, Vector3 direction, float damage)
@@ -100,10 +102,22 @@ public class Car : MonoBehaviour {
     {
         Debug.Log("Dropped");
         pickup.SetPickupEnabled(true);
+        pickup.TemporarilyDisableCollisionsWith(carBodyCollider);
         pickup.RemoveFromCar();
         pickups.Remove(pickup);
 
         BroadcastMessage("DidDropPickup", pickup, SendMessageOptions.DontRequireReceiver);
+    }
+
+    public void EnteredWaypoint(Waypoint waypoint)
+    {
+        if(HasOrb())
+        {
+            Scoreboard.ScoreForCar(this);
+            // TODO: Disable this waypoint for yourself for like 30 seconds or longer
+        }
+
+        waypoint.DisableForCar(this);
     }
 
     public List<Car> OtherCars()

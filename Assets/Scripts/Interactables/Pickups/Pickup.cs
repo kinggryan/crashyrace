@@ -46,7 +46,7 @@ public class Pickup : MonoBehaviour {
     public void TemporarilyDisableCollisionsWith(Collider col)
     {
         Physics.IgnoreCollision(GetComponent<Collider>(), col);
-        EnableCollisions(col, 2f);
+        EnableCollisions(col, 15f);
     }
 
     public void SetPickupEnabled(bool enabled)
