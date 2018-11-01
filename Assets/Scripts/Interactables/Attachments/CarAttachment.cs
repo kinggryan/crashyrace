@@ -5,6 +5,7 @@ using UnityEngine;
 public class CarAttachment : MonoBehaviour {
 
     public bool continuous;
+    public Car car;
 
     private new Renderer renderer;
     [SerializeField]

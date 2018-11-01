@@ -5,14 +5,27 @@ using UnityEngine;
 public class CarBooster : CarAttachment {
 
     public float boostForce;
-    public Rigidbody car;
+    public float boostDuration;
     public float maxBoostedSpeed;
+    public float scrapCost;
+
+    private float boostTimer;
 
 	// Update is called once per frame
     void Update() {
-        if (beingUsed && car.velocity.magnitude < maxBoostedSpeed)
+        if (boostTimer >= 0 && car.rbody.velocity.magnitude < maxBoostedSpeed)
         {
-            car.AddForce(boostForce * transform.forward);
+            car.rbody.AddForce(boostForce * transform.forward);
+            boostTimer -= Time.deltaTime;
         }
 	}
+
+    public override void Use(GrapplerCharacterController character)
+    {
+        if(car.PayScrap(scrapCost))
+        {
+            boostTimer = boostDuration;
+            base.Use(character);
+        }
+    }
 }

@@ -37,6 +37,9 @@ public class Car : MonoBehaviour {
     // When the car takes this much damage, the counter resets and a scrap is spawned
     private float scrapDropDamageCounter = 10f;
     private float scrapDropDamageCounterMax = 10f;
+    private float scrapDropFromOrbTimer = 2f;
+    private float scrapDropFromOrbTimerMax = 2f;
+    private float scrapGainFromOrbPerSecond = 1f;
 
 	// Use this for initialization
 	void Awake () {
@@ -47,8 +50,25 @@ public class Car : MonoBehaviour {
         damageObjects = new List<CarDamage>();
         Scoreboard.SetScoreForCar(this,0);
     }
-	
-	public void TakeDamage(Vector3 point, Vector3 direction, float damage)
+
+    private void Update()
+    {
+        if(HasOrb())
+        {
+            // Every 2 seconds, the car with the orb drops scrap. This functions as both a trail for other cars and as a catch-up mechanic for other cars
+            scrapDropFromOrbTimer -= Time.deltaTime;
+            if(scrapDropFromOrbTimer <= 0)
+            {
+                scrapDropFromOrbTimer += scrapDropFromOrbTimerMax;
+                DropScrap();
+            }
+
+            // Gain scrap over time due to having the orb
+            GainScrap(scrapGainFromOrbPerSecond * Time.deltaTime);
+        }
+    }
+
+    public void TakeDamage(Vector3 point, Vector3 direction, float damage)
     {
         // For this debug thing
         var previousBracket = BracketForHP(hp);
@@ -99,6 +119,15 @@ public class Car : MonoBehaviour {
     public void GainScrap(float amount)
     {
         scrap = Mathf.Min(maxScrap, scrap + amount);
+    }
+
+    // Returns true if the scrap payment was successful
+    public bool PayScrap(float amount)
+    {
+        if (scrap < amount)
+            return false;
+        scrap -= amount;
+        return true;
     }
 
     public void RemoveDamageObject(CarDamage obj)
