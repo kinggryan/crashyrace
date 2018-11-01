@@ -24,6 +24,7 @@ public class Car : MonoBehaviour {
     public float maxScrap = 100f;
 
     public float outOfHPExplosionForce;
+    public float outOfHPExplosionTorque;
 
     public GameObject damagePrefab;
     public GameObject scrapPrefab;
@@ -74,13 +75,21 @@ public class Car : MonoBehaviour {
     public void TakeDamage(Vector3 point, Vector3 direction, float damage)
     {
         // For this debug thing
+        var previousHP = hp;
         var previousBracket = BracketForHP(hp);
         hp -= damage;
         var newBracket = BracketForHP(hp);
         if(!Mathf.Approximately(newBracket.hp, previousBracket.hp))
         {
-            ExplodeAtPoint(point);
+            //ExplodeAtPoint(point);
             UpdateStatsForHPBracket(newBracket);
+        }
+
+        // If the HP is 0, explode
+        if(previousHP >= 0 && hp <= 0)
+        {
+            // TODO: This should also be prevented for like 20 seconds or something, so if youre repairing you don't explode a bunch
+            ExplodeFromNoHP();
         }
 
         if(damageObjects.Count == 0)
@@ -257,5 +266,15 @@ public class Car : MonoBehaviour {
         // rbody.AddExplosionForce(outOfHPExplosionForce, point + 2*Vector3.down, 10f);
         var forceVector = outOfHPExplosionForce*((rbody.position - point).normalized + Vector3.up).normalized;
         rbody.AddForceAtPosition(forceVector, point, ForceMode.Impulse);
+    }
+
+    private void ExplodeFromNoHP()
+    {
+        // An upward force with some random side to side motion as well
+        var forceVector = outOfHPExplosionForce * (Random.Range(-1f, 1f) * transform.right + Vector3.up).normalized;
+        var randomTorqueDirection2d = Random.insideUnitCircle.normalized;
+        var randomTorque = outOfHPExplosionTorque * new Vector3(randomTorqueDirection2d.x, 0, randomTorqueDirection2d.y);
+        rbody.AddForce(forceVector, ForceMode.Impulse);
+        rbody.AddTorque(randomTorque, ForceMode.Impulse);
     }
 }
