@@ -20,6 +20,9 @@ public class Car : MonoBehaviour {
     public float hp { get; private set; }
     public HPBracket[] hpBrackets;
 
+    public float scrap = 50f;
+    public float maxScrap = 100f;
+
     public float outOfHPExplosionForce;
 
     public GameObject damagePrefab;
