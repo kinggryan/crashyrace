@@ -85,7 +85,7 @@ public class SimpleCarController : MonoBehaviour
             }
 
             // if reversing direction to previous motor, actually just hit the brakes
-            Debug.Log(axleInfo.leftWheel.rpm + " ; " + motor);
+           // Debug.Log(axleInfo.leftWheel.rpm + " ; " + motor);
             if(Mathf.Abs(axleInfo.leftWheel.rpm) > 50 && Mathf.Abs(motor) > 0.5f*maxMotorTorque && Mathf.Sign(axleInfo.leftWheel.rpm) != Mathf.Sign(motor))
                 axleInfo.leftWheel.brakeTorque = maxBrakeTorque;
             else

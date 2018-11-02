@@ -96,6 +96,7 @@ public class GrapplerDecisionLayer : MonoBehaviour, IGrapplerSteeringLayerDelega
 
     public void DidCompleteAllSteeringInstructions()
     {
-        currentAction.Execute(steeringLayer);
+        if(currentAction != null)
+            currentAction.Execute(steeringLayer);
     }
 }

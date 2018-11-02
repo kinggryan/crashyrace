@@ -70,6 +70,9 @@ public class Car : MonoBehaviour {
         }
 
         GainScrap(passiveScrapGainPerSecond * Time.deltaTime);
+
+        // Update road type params
+        UpdateParamsForCurrentRoadType();
     }
 
     public void TakeDamage(Vector3 point, Vector3 direction, float damage)
@@ -276,5 +279,46 @@ public class Car : MonoBehaviour {
         var randomTorque = outOfHPExplosionTorque * new Vector3(randomTorqueDirection2d.x, 0, randomTorqueDirection2d.y);
         rbody.AddForce(forceVector, ForceMode.Impulse);
         rbody.AddTorque(randomTorque, ForceMode.Impulse);
+    }
+
+    private void UpdateParamsForCurrentRoadType()
+    {
+        var roadTypes = new List<RoadType>();
+        foreach(var axleInfo in carController.axleInfos)
+        {
+            var leftType = GetRoadTypeForWheel(axleInfo.leftWheel);
+            var rightType = GetRoadTypeForWheel(axleInfo.rightWheel);
+            if (leftType != null)
+                roadTypes.Add(leftType);
+            if (rightType != null)
+                roadTypes.Add(rightType);
+        }
+
+        // Bail out here if there are no road types - we need to avoid a divide by 0 error
+        if (roadTypes.Count == 0)
+        {
+            rbody.drag = 0;
+            return;
+        }
+
+        var averageDrag = 0f;
+        foreach(var roadType in roadTypes)
+        {
+            averageDrag += roadType.carDrag;
+        }
+        averageDrag /= roadTypes.Count;
+
+        rbody.drag = averageDrag;
+    }
+
+    private RoadType GetRoadTypeForWheel(WheelCollider wheel)
+    {
+        WheelHit hitInfo;
+        if (wheel.GetGroundHit(out hitInfo))
+        {
+            return hitInfo.collider.GetComponent<RoadType>();
+        }
+
+        return null;
     }
 }

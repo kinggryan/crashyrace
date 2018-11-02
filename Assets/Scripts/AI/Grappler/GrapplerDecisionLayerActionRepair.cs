@@ -18,6 +18,9 @@ public class GrapplerDecisionLayerActionRepair : GrapplerDecisionLayer.Action
         // This way, if you're close to an enemy you prioritize repairing less, as other things are likely more important
         // If you're far away, you need to repair the damage to catch up, so this gains a high priority
         var target = car.ClosestEnemyCar();
+        if (target == null)
+            return 0f;
+
         var distance = Vector3.Distance(target.transform.position, car.transform.position);
         var scalar = Mathf.Min(1, Mathf.Max(0, (distance - minPriorityDistance)) / (maxPriorityDistance - minPriorityDistance));
         var damageAmount = 1 - car.hp / car.maxHP;
