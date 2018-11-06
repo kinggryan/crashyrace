@@ -5,7 +5,6 @@ using UnityEngine;
 public class DebugPlayerAISwap : MonoBehaviour {
 
     // When the player pressed
-    public int playerNum;
     public Camera cam;
     public MonoBehaviour playerController;
     public MonoBehaviour aiController;
@@ -29,7 +28,9 @@ public class DebugPlayerAISwap : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKeyDown(""+playerNum))
+        // TODO: Make the car controller also have a player number or something
+        var playerNumber = grapplerController != null ? grapplerController.playerNumber : 0;
+		if(Input.GetKeyDown(""+ playerNumber))
         {
             currentPlayer.SwapToAI();
             SwapToPlayer();
@@ -49,7 +50,8 @@ public class DebugPlayerAISwap : MonoBehaviour {
         }
         if (grapplerController != null)
             grapplerController.input = (GrapplerInput)playerController;
-        cam.enabled = true;
+        if(!PhotonNetwork.connected)
+            cam.enabled = true;
     }
 
     void SwapToAI()
@@ -64,6 +66,7 @@ public class DebugPlayerAISwap : MonoBehaviour {
         }
         if (grapplerController != null)
             grapplerController.input = (GrapplerInput)aiController;
-        cam.enabled = false;
+        if (!PhotonNetwork.connected)
+            cam.enabled = false;
     }
 }

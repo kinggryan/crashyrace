@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GrapplerInput : MonoBehaviour {
 
+    [HideInInspector]
+    public int playerNum;
+
     public virtual float GetHorizontalInput()
     {
         return 0f;

@@ -9,7 +9,16 @@ public class DriverCharacterController : ICarControlInput {
     public ControllerLook controllerLook;
     public int playerNum;
     public bool controllerMode;
-    
+
+    public void Awake()
+    {
+        if(PhotonNetwork.connected && PhotonNetwork.player.ID != playerNum)
+        {
+            cam.enabled = false;
+            // TODO: Transfer ownership n stuff
+        }
+    }
+
     public void Update()
     {
         if (controllerMode)

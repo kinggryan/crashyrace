@@ -2,7 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrapplerCharacterController : MonoBehaviour {
+public class GrapplerCharacterController : Photon.MonoBehaviour {
+
+    // For the networking layer
+    // We need the following information:
+    //  the state
+    //  the position, for that state
+    //  the camera's look direction (for certain things)
+    // We could set this up to just constantly transmit the position relative to the car and the state, but then the networking layer needs to determine when transitions between states have bene made and how to handle those
+    // We could set it up to track the movement information for the relevant state, and move between states as an RPC
+    // Regardless, we want to separate the networking logic from the character controller logic, ideally
+    // 
 
     private enum State
     {
@@ -10,6 +20,8 @@ public class GrapplerCharacterController : MonoBehaviour {
         InStation,
         SlidingToPosition
     }
+
+    public int playerNumber;
 
     public Rigidbody car;
     public Camera cam;
@@ -38,6 +50,13 @@ public class GrapplerCharacterController : MonoBehaviour {
     void Awake()
     {
         selectedAttachment = null;
+        input.playerNum = playerNumber;
+
+        if(PhotonNetwork.connected && PhotonNetwork.player.ID == playerNumber)
+        {
+            photonView.TransferOwnership(PhotonNetwork.player);
+            cam.enabled = true;
+        }
     }
 
     // Use this for initialization
@@ -48,15 +67,28 @@ public class GrapplerCharacterController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(state == State.InStation)
+        if(PhotonNetwork.connected && !photonView.isMine)
+        {
+            UpdateRemote();
+        } else
+        {
+            UpdateLocal();
+        }
+    }
+
+    void UpdateLocal()
+    {
+        if (state == State.InStation)
         {
             UpdateMovementInStation();
             UpdateAttachmentUseInStation();
 
-        } else if(state == State.SlidingToPosition)
+        }
+        else if (state == State.SlidingToPosition)
         {
             UpdateSlidingMovement();
-        } else
+        }
+        else
         {
             UpdateMovement();
             UpdateAttachmentUse();
@@ -216,6 +248,37 @@ public class GrapplerCharacterController : MonoBehaviour {
     bool SlidingReachedDestination()
     {
         return Vector3.Distance(slidingDestinationRelativeToCar, car.transform.InverseTransformPoint(transform.position)) < stationUseDistance;
+    }
+
+    // Networking
+
+    void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.isWriting)
+        {
+            // Write the state and the transform's position relative to the car
+            var relativePos = positionRelativeToCar;
+            stream.Serialize(ref relativePos);
+            var tempState = (int)state;
+            stream.Serialize(ref tempState);
+        } else
+        {
+            Vector3 relativePos = Vector3.zero;
+            stream.Serialize(ref relativePos);
+            int tempState = 0;
+            stream.Serialize(ref tempState);
+
+            positionRelativeToCar = relativePos;
+            state = (State)tempState;
+        }
+    }
+
+    // This should be used to update a character controller that is owned remotely
+    void UpdateRemote()
+    {
+        var currentPosRelativeToCar = car.transform.InverseTransformPoint(transform.position);
+        var targetPosRelativeToCar = positionRelativeToCar;
+        transform.position = Vector3.MoveTowards(car.transform.TransformPoint(currentPosRelativeToCar), car.transform.TransformPoint(targetPosRelativeToCar), movementSpeed*Time.deltaTime);
     }
 
 

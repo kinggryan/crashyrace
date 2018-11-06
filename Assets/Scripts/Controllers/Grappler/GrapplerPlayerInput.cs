@@ -7,7 +7,6 @@ public class GrapplerPlayerInput : GrapplerInput {
     public Camera cam;
     public MouseLook mouseLook;
     public ControllerLook controllerLook;
-    public int playerNum;
     public float maxUseDistance = 2f;
     public bool controllerMode;
 
